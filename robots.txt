@@ -1,0 +1,6 @@
+# Robots.txt for Mosin Nagant PU Sniper Collector Platform
+User-agent: *
+Allow: /
+
+# Sitemap Pointer
+Sitemap: https://mosinpu.com/sitemap.xml

@@ -1,0 +1,6 @@
+# Local dev tooling (references local machine paths, not needed for deployment)
+.claude/
+
+# OS junk
+.DS_Store
+Thumbs.db
