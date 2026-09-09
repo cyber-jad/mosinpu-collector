@@ -1045,6 +1045,15 @@ a:hover {
   box-shadow: 0 0 0 3px rgba(146, 64, 14, 0.15);
 }
 
+.form-hint {
+  display: block;
+  margin-top: 0.4rem;
+  font-size: 0.8rem;
+  color: var(--text-muted, #6b7280);
+  font-style: italic;
+  line-height: 1.4;
+}
+
 /* Results Output Card */
 .calc-results-card {
   background: #ffffff;
