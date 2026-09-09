@@ -61,8 +61,9 @@ window.ValuationCalculator = {
 
             <!-- Scope Matching & Provenance (Major Value Driver) -->
             <div class="form-group scope-highlight-group">
-              <label for="calc-scope-match">🎯 PU Scope Model & Matching Status (Major Impact):</label>
+              <label for="calc-scope-match">🎯 PU Scope Model &amp; Matching Status — varies by factory (Major Impact):</label>
               <select id="calc-scope-match" class="form-select">
+                <!-- Populated dynamically by updateScopeMatchOptions() based on factory selection -->
                 <option value="arsenal_matched_ep" selected>Soviet Arsenal Lined-Out & EP / Stamped Matched Scope [Standard Refurb Baseline]</option>
                 <option value="matching_original_shank">100% Factory Stamped Matching Scope (Shank S/N matches scope physical S/N) [+$1,500 - $2,000+]</option>
                 <option value="rare_fed_svt">Rare Factory #353 FED / Early SVT-40 Scope in Shimmed Base [+$900]</option>
@@ -71,6 +72,7 @@ window.ValuationCalculator = {
                 <option value="reproduction_scope">⚠️ Modern Commercial Reproduction / Fake Optic (Flat Screws) [-$700 Penalty]</option>
                 <option value="no_scope_base_only">❌ No Scope (Mount/Base Only, Missing Optic) [-$850 Deduction]</option>
               </select>
+              <small class="form-hint">Options change when you switch factory — Tula used mount stamps (no shank serial); Izhevsk stamped the scope serial on the barrel shank.</small>
             </div>
 
             <!-- Scope Optical Clarity & Mechanical Health -->
@@ -177,6 +179,51 @@ window.ValuationCalculator = {
 
     this.state.factory = factory;
     this.state.year = yearSelect.value;
+    this.updateScopeMatchOptions(factory);
+  },
+
+  // Izhevsk: scope serial stamped on barrel shank — "number matching" is meaningful.
+  // Tula: NO scope serial on shank — mount stamping is the matching indicator, not shank serial.
+  // EP re-stamping appears on both, but is a post-war arsenal mark, not original WW2 issue.
+  updateScopeMatchOptions(factory) {
+    const select = document.getElementById('calc-scope-match');
+    if (!select) return;
+
+    const prev = this.state.scopeMatch;
+
+    if (factory === 'izhevsk') {
+      select.innerHTML = `
+        <option value="arsenal_matched_ep">Soviet Arsenal Lined-Out &amp; EP / Stamped Matched Scope [Standard Refurb Baseline]</option>
+        <option value="matching_original_shank">100% Factory Stamped Matching Scope (Shank S/N matches scope physical S/N) [+$1,500 – $2,000+]</option>
+        <option value="rare_fed_svt">Rare Factory #353 FED / Early SVT-40 Scope in Shimmed Base [+$900]</option>
+        <option value="krasnogorsk_393">Factory #393 Krasnogorsk Scope (Silumin/Steel Anodized) [+$650]</option>
+        <option value="authentic_soviet_nonmatching">Authentic WWII Soviet Scope (Factory #357/#297, Non-matching serial) [−$150 vs matched]</option>
+        <option value="reproduction_scope">⚠️ Modern Commercial Reproduction / Fake Optic (Flat Screws) [−$700 Penalty]</option>
+        <option value="no_scope_base_only">❌ No Scope (Mount/Base Only, Missing Optic) [−$850 Deduction]</option>
+      `;
+      // Tula-only values don't exist on Izhevsk — fall back to default
+      const tulaOnly = new Set(['tula_stamped_mount', 'tula_ep_arsenalwork']);
+      select.value = tulaOnly.has(prev) ? 'arsenal_matched_ep' : (prev || 'arsenal_matched_ep');
+      if (!select.value) select.value = 'arsenal_matched_ep';
+    } else {
+      // Tula: mount stamping is the correct matching indicator; shank serial matching is NOT applicable
+      select.innerHTML = `
+        <option value="tula_stamped_mount">Original Tula: Receiver S/N Stamped on Mount Only (No Scope Shank S/N — Correct Tula As-Issued) [Top Tier]</option>
+        <option value="tula_ep_arsenalwork">Arsenal EP / Re-Stamp on Mount (Post-WW2 Arsenal Work — Correct but Cold War, Not Original Issue)</option>
+        <option value="rare_fed_svt">Rare Factory #353 FED / Early SVT-40 Scope in Shimmed Base [+$900]</option>
+        <option value="krasnogorsk_393">Factory #393 Krasnogorsk Scope (Krasnogorsk produced 1943 Tula scopes) [+$650]</option>
+        <option value="authentic_soviet_nonmatching">Authentic WWII Soviet Scope (Factory #357/#297, No mount stamp match) [−$150]</option>
+        <option value="reproduction_scope">⚠️ Modern Commercial Reproduction / Fake Optic (Flat Screws) [−$700 Penalty]</option>
+        <option value="no_scope_base_only">❌ No Scope (Mount/Base Only, Missing Optic) [−$850 Deduction]</option>
+      `;
+      // Izhevsk-only value doesn't apply to Tula
+      select.value = (prev === 'matching_original_shank' || prev === 'arsenal_matched_ep')
+        ? 'tula_stamped_mount'
+        : (prev || 'tula_stamped_mount');
+      if (!select.value) select.value = 'tula_stamped_mount';
+    }
+
+    this.state.scopeMatch = select.value;
   },
 
   // Delegated change handler for every form field: syncs `state` from the
@@ -190,7 +237,7 @@ window.ValuationCalculator = {
     container.addEventListener('change', (e) => {
       const target = e.target;
       if (target.id === 'calc-factory') {
-        this.updateYearOptions();
+        this.updateYearOptions(); // also calls updateScopeMatchOptions
       }
 
       this.state.factory = document.getElementById('calc-factory').value;
@@ -276,11 +323,24 @@ window.ValuationCalculator = {
 
     // 2. SCOPE PRICING IMPACT
     if (scopeMatch === 'matching_original_shank') {
+      // Izhevsk only: shank serial matches scope physical S/N
       scopeValueImpact = 1800;
-      scopeImpactDesc = "+$1,800 (100% Factory Stamped Matching Scope to Barrel Shank)";
+      scopeImpactDesc = "+$1,800 (100% Factory Stamped Matching Scope to Barrel Shank — Izhevsk)";
       baseLow += 1400;
       baseHigh += 2000;
       highlights.push("🎯 <strong>Untouched Scope Serial Match:</strong> Barrel shank stamped scope serial number exactly matches physical optic. Top tier collector value.");
+    } else if (scopeMatch === 'tula_stamped_mount') {
+      // Tula: receiver S/N stamped on mount only — this IS the correct original as-issued configuration
+      scopeValueImpact = 400;
+      scopeImpactDesc = "+$400 (Receiver S/N Stamped on Mount — Correct Original Tula As-Issued, No Scope Shank Serial)";
+      baseLow += 300;
+      baseHigh += 500;
+      highlights.push("🎯 <strong>Original Tula Mount Stamp:</strong> Receiver serial stamped on mount — the correct WW2 as-issued configuration for Tula. Scope shank serial matching is NOT a Tula feature.");
+    } else if (scopeMatch === 'tula_ep_arsenalwork') {
+      // Tula: EP or re-stamp on mount = post-war Cold War arsenal work, not original issue
+      scopeValueImpact = 400;
+      scopeImpactDesc = "Arsenal EP / Re-Stamp on Mount — Cold War Arsenal Correct, Not Original WW2 Issue";
+      highlights.push("🔧 <strong>Tula EP Arsenal Work:</strong> Izhevsk did ~99% of arsenal refurbs. EP on Tula mounts = correct arsenal work but Cold War era, not original WW2 time issue.");
     } else if (scopeMatch === 'rare_fed_svt') {
       scopeValueImpact = 900;
       scopeImpactDesc = "+$900 (Rare 1940–1942 FED SVT-40 Optic in Shimmed Base)";
