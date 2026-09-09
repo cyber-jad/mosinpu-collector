@@ -62,7 +62,15 @@
   --transition-smooth: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
-/* Reset & Base */
+/* Reset & Base
+   The width/max-width/overflow-x:hidden trio below is deliberately applied
+   to BOTH html and body (with !important). This page has repeatedly picked
+   up stray horizontal overflow from individual components — an absolutely-
+   positioned nav dropdown panel, an oversized image, etc. (see the
+   .nav-dropdown-panel fix further down for one real example) — and any
+   single offending element is enough to open a page-wide horizontal
+   scrollbar. This is a deliberate blanket safety net rather than trusting
+   every component to stay in bounds on its own. */
 *, *::before, *::after {
   box-sizing: border-box;
   margin: 0;
@@ -302,6 +310,7 @@ a:hover {
   left: 0;
   margin-top: 0.5rem;
   min-width: 240px;
+  max-width: calc(100vw - 2rem);
   background-color: #ffffff;
   border: 1px solid var(--border-subtle);
   border-radius: var(--radius-md);
@@ -315,6 +324,14 @@ a:hover {
   pointer-events: none;
   transition: var(--transition-smooth);
   z-index: 150;
+}
+
+/* The right-most dropdown sits close to the viewport edge — open it
+   flush with its trigger's right edge instead of the left, so the
+   panel never spills past the edge of the page. */
+#nav-dropdown-reference .nav-dropdown-panel {
+  left: auto;
+  right: 0;
 }
 
 .nav-dropdown.open .nav-dropdown-panel {

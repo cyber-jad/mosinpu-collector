@@ -6,14 +6,16 @@
  */
 
 window.AuthenticityWizard = {
-  currentStep: 0,
-  answers: {},
+  currentStep: 0,       // index into MOSIN_DATA.authFactors — which question is on screen
+  answers: {},           // factorId -> selected optionId, one entry per answered question
 
   init() {
     this.renderWizard();
     this.bindEvents();
   },
 
+  // Renders the current question (title, options, progress bar, nav buttons)
+  // into #auth-wizard-container. Re-run on every step change and every answer.
   renderWizard() {
     const container = document.getElementById('auth-wizard-container');
     if (!container) return;
@@ -60,6 +62,8 @@ window.AuthenticityWizard = {
     container.innerHTML = html;
   },
 
+  // Single delegated click handler for the whole wizard: answering a question,
+  // stepping forward/back, and (on the results screen) restarting.
   bindEvents() {
     const container = document.getElementById('auth-wizard-container');
     if (!container) return;
@@ -110,6 +114,9 @@ window.AuthenticityWizard = {
     });
   },
 
+  // Tallies points from every answered question into a 0-100 authenticity
+  // index, derives a verdict (genuine / refurb / ex-sniper / faux), and
+  // renders the results screen in place of the question flow.
   calculateAndRenderResults() {
     const container = document.getElementById('auth-wizard-container');
     if (!container) return;
@@ -142,15 +149,29 @@ window.AuthenticityWizard = {
         }
 
         if (opt.type === 'ex_sniper') isExSniper = true;
+        // These specific option IDs are unambiguous "this is a modern commercial
+        // build, not a wartime rifle" tells (hex receiver, no shank proof, alloy
+        // mount, Russian export stamp, welded bolt). Any one of them caps the
+        // verdict at "faux clone" below regardless of how the other answers scored,
+        // since a single disqualifying red flag shouldn't be averaged away by
+        // otherwise-plausible answers on the remaining questions.
         if (opt.id === 'hex_receiver' || opt.id === 'no_proof' || opt.id === 'aluminum_mount' || opt.id === 'made_in_russia_stamp' || opt.id === 'welded_infantry_bolt') {
           isFauxClone = true;
         }
       }
+      // maxPossibleScore accumulates the best-case (highest-point) answer for
+      // each question, so the final ratio reflects "how close to a perfect
+      // answer set" rather than an arbitrary fixed denominator.
       maxPossibleScore += Math.max(...factor.options.map(o => o.points));
     });
 
-    // Normalize score to 0 - 100
+    // Normalize the raw point total to a 0-100 "Authenticity Index".
     let normalizedScore = Math.max(0, Math.min(100, Math.round((totalScore / maxPossibleScore) * 100)));
+    // A confirmed faux-clone tell overrides whatever the arithmetic score says —
+    // clamp into the "Commercial Reproduction" band (see verdict thresholds
+    // below) even if enough other answers scored high enough to average out
+    // above it. 32 is an arbitrary mid-band value; anything under the 40
+    // threshold below produces the same "faux" verdict.
     if (isFauxClone && normalizedScore > 40) normalizedScore = 32;
 
     let verdictClass = "";
@@ -158,6 +179,8 @@ window.AuthenticityWizard = {
     let verdictDesc = "";
     let collectorRecommendation = "";
 
+    // Verdict bands: 85+ genuine, 60-84 arsenal refurb, 40-59 (or any
+    // ex-sniper answer) re-snipered, everything else faux/reproduction.
     if (normalizedScore >= 85 && !isFauxClone) {
       verdictClass = "verdict-genuine";
       verdictTitle = "100% Authentic Genuine Soviet / Hungarian Sniper";

@@ -6,14 +6,17 @@
  */
 
 window.MarkingsExplorer = {
-  currentTab: 'barrel-shank',
-  simRange: 300,
+  currentTab: 'barrel-shank',  // which sub-tab is active (see getTabContent)
+  simRange: 300,                // reticle simulator's current target distance in meters
 
   init() {
     this.renderExplorer();
     this.bindEvents();
   },
 
+  // Renders the tab strip plus whichever tab's content is currently active.
+  // Called on init and again every time a tab is clicked (full re-render,
+  // not just a content swap, since the tab strip's "active" state changes too).
   renderExplorer() {
     const container = document.getElementById('markings-explorer-container');
     if (!container) return;
@@ -55,6 +58,9 @@ window.MarkingsExplorer = {
     }
   },
 
+  // Delegated click handler for the whole explorer: switching sub-tabs, and
+  // (on the barrel-shank tab) clicking a numbered SVG hotspot to show its
+  // writeup in the detail panel.
   bindEvents() {
     const container = document.getElementById('markings-explorer-container');
     if (!container) return;
@@ -76,6 +82,9 @@ window.MarkingsExplorer = {
     });
   },
 
+  // Only relevant on the reticle-sim tab: wires the distance slider to
+  // updateSimulatorTelemetry(). Re-bound every time that tab is (re)rendered,
+  // since renderExplorer() replaces the slider element via innerHTML.
   bindSimulatorEvents() {
     const rangeSlider = document.getElementById('sim-range-slider');
     if (!rangeSlider) return;
@@ -86,6 +95,13 @@ window.MarkingsExplorer = {
     });
   },
 
+  // Recomputes the three telemetry readouts (BDC drum, flight time, drop)
+  // and rescales the target silhouette as the range slider moves, patching
+  // the DOM directly rather than re-rendering — this runs on every 'input'
+  // event while dragging, so a full innerHTML replace would be too slow/jittery.
+  // NOTE: the same three formulas are duplicated in getReticleSimulatorView()
+  // below for the initial paint (before any slider 'input' event has fired);
+  // if you change the ballistics math here, update it there too.
   updateSimulatorTelemetry() {
     const r = this.simRange;
     const badge = document.getElementById('sim-range-val');
@@ -119,6 +135,8 @@ window.MarkingsExplorer = {
     }
   },
 
+  // Looks up hotspotId in the hotspotData table (bottom of this file) and
+  // renders its writeup into the detail panel beside the barrel-shank diagram.
   showHotspotDetail(hotspotId) {
     const detailBox = document.getElementById('hotspot-detail-box');
     if (!detailBox) return;
@@ -138,6 +156,8 @@ window.MarkingsExplorer = {
     `;
   },
 
+  // Returns the HTML string for one sub-tab. Each tab's markup lives in its
+  // own get*View() method below (mostly static content + inline SVG diagrams).
   getTabContent(tab) {
     switch (tab) {
       case 'barrel-shank':

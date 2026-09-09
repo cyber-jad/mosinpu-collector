@@ -113,7 +113,10 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 
-  // Safely initialize all interactive modules with try/catch
+  // Safely initialize all interactive modules with try/catch — each module
+  // owns its own DOM subtree, so a bug in one (e.g. a bad data lookup) is
+  // caught and logged here rather than throwing and preventing every
+  // module after it in the list from ever calling init().
   const modules = [
     { name: 'AuthenticityWizard', obj: window.AuthenticityWizard },
     { name: 'ValuationCalculator', obj: window.ValuationCalculator },

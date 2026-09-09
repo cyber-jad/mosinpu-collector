@@ -183,7 +183,13 @@
         </div>
       </div>
 
-      <!-- Main Navigation Menu -->
+      <!-- Main Navigation Menu
+           Grouped into "Tools" and "Reference" dropdowns (see app.js's
+           dropdown handling + css/styles.css .nav-dropdown-*) so the header
+           shows 4 top-level items instead of 9 flat links, which is what
+           actually fits without wrapping/overflowing at common desktop
+           widths. Every link's data-target must match an .app-section id
+           below — app.js's switchTab() reads it to show/hide sections. -->
       <nav class="main-nav" id="main-navigation" aria-label="Primary Site Navigation" role="navigation">
         <a href="#history-chronicle" class="main-nav-link" data-target="history-chronicle">📖 Wartime History</a>
 
@@ -277,7 +283,7 @@
       </div>
     </section>
 
-    <!-- SECTION: WARTIME HISTORY & SCOPE ORIGINS -->
+    <!-- SECTION 1: WARTIME HISTORY & SCOPE ORIGINS -->
     <section id="history-chronicle" class="app-section active-section" aria-labelledby="history-heading">
       <div class="section-header">
         <span class="section-tag">Historical Chronicle</span>
@@ -405,7 +411,7 @@
       </div>
     </section>
 
-    <!-- SECTION 4: AUTHENTICITY INSPECTOR / WIZARD -->
+    <!-- SECTION 3: AUTHENTICITY INSPECTOR / WIZARD -->
     <section id="auth-inspector" class="app-section" aria-labelledby="auth-heading">
       <div class="section-header">
         <span class="section-tag">Diagnostic Tool</span>
@@ -462,7 +468,7 @@
       </div>
     </section>
 
-    <!-- SECTION: COLLECTOR PHOTO GALLERY -->
+    <!-- SECTION 7: COLLECTOR PHOTO GALLERY -->
     <section id="photo-gallery" class="app-section" aria-labelledby="gallery-heading">
       <div class="section-header">
         <span class="section-tag">From The Collection</span>
@@ -476,7 +482,7 @@
       </div>
     </section>
 
-    <!-- SECTION 7: COLLECTOR FAQ (PEOPLE ALSO ASK & FEATURED SNIPPETS) -->
+    <!-- SECTION 8: COLLECTOR FAQ (PEOPLE ALSO ASK & FEATURED SNIPPETS) -->
     <section id="collector-faq" class="app-section" aria-labelledby="faq-heading">
       <div class="section-header">
         <span class="section-tag">Collector FAQ</span>
@@ -555,7 +561,7 @@
       </div>
     </section>
 
-    <!-- SECTION 8: BUYER'S FIELD CHECKLIST -->
+    <!-- SECTION 9: BUYER'S FIELD CHECKLIST -->
     <section id="buyers-checklist" class="app-section" aria-labelledby="checklist-heading">
       <div class="section-header">
         <span class="section-tag">Field Protocol</span>

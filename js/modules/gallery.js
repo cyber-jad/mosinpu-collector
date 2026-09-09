@@ -94,13 +94,15 @@ window.CollectorGallery = {
     }
   ],
 
-  activeIndex: 0,
+  activeIndex: 0,   // index into `items` currently shown in the open lightbox
 
   init() {
     this.renderGallery();
     this.bindEvents();
   },
 
+  // Renders the card grid plus the (initially hidden) lightbox markup — both
+  // built once here since this module has no filters/search to re-render for.
   renderGallery() {
     const container = document.getElementById('collector-gallery-container');
     if (!container) return;
@@ -144,6 +146,9 @@ window.CollectorGallery = {
     `;
   },
 
+  // Opens (or jumps to a new photo within) the lightbox. `idx` is wrapped
+  // with modulo so Prev/Next can pass activeIndex - 1 / + 1 without bounds
+  // checking and correctly loop from the first photo to the last and back.
   openLightbox(idx) {
     const overlay = document.getElementById('gallery-lightbox-overlay');
     if (!overlay) return;
@@ -167,6 +172,10 @@ window.CollectorGallery = {
     document.body.style.overflow = '';
   },
 
+  // One delegated click listener handles opening a card, closing via the ✕
+  // button, Prev/Next, and clicking the dark overlay backdrop to dismiss.
+  // A separate document-level keydown listener adds Esc/←/→ shortcuts,
+  // scoped to only act while the lightbox is actually open.
   bindEvents() {
     const container = document.getElementById('collector-gallery-container');
     if (!container) return;
