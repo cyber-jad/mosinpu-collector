@@ -5,7 +5,7 @@
  */
 
 window.ProductionMatrix = {
-  currentFilter: 'all',
+  currentFilter: 'all',  // 'all' | 'tula' | 'izhevsk' | '1942' — see filter pills
   searchQuery: '',
 
   init() {
@@ -13,6 +13,9 @@ window.ProductionMatrix = {
     this.bindEvents();
   },
 
+  // Renders the filter pills, search box, and table body from
+  // getFilteredData(). Called on init and after every filter/search change —
+  // the whole table is rebuilt rather than diffed, since the dataset is tiny.
   renderMatrix() {
     const container = document.getElementById('production-matrix-container');
     if (!container) return;
@@ -118,6 +121,10 @@ window.ProductionMatrix = {
     container.innerHTML = html;
   },
 
+  // Turns MOSIN_DATA.production's nested {factory: {years: {...}}} shape into
+  // a flat array of per-year rows, then applies the active filter pill and
+  // search query. Re-run from scratch on every render rather than cached,
+  // since the source dataset is small and static.
   getFilteredData() {
     const raw = window.MOSIN_DATA.production;
     let list = [];
@@ -167,6 +174,10 @@ window.ProductionMatrix = {
     return list;
   },
 
+  // Delegated click handler for the filter pills. The search box gets its
+  // own listener (bindSearchInput) since it needs re-attaching after every
+  // renderMatrix() call, whereas this delegated handler survives re-renders
+  // because it's bound once to the (never-replaced) container element.
   bindEvents() {
     const container = document.getElementById('production-matrix-container');
     if (!container) return;
@@ -183,6 +194,11 @@ window.ProductionMatrix = {
     this.bindSearchInput();
   },
 
+  // Wires the search input. renderMatrix() replaces the input element via
+  // innerHTML on every keystroke (to refresh the table), which would
+  // otherwise drop focus and reset the caret to the start — so this
+  // re-attaches the listener and restores focus/caret position after
+  // each render.
   bindSearchInput() {
     const searchInput = document.getElementById('matrix-search');
     if (!searchInput) return;

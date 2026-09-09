@@ -6,6 +6,9 @@
  */
 
 window.BuyersChecklist = {
+  // `weight` values are point contributions toward calculateScore()'s
+  // "X / 100" readout — they're authored to sum to exactly 100 across all
+  // 10 items, so keep that invariant if items are added/reweighted.
   items: [
     {
       id: "check-1",
@@ -64,18 +67,20 @@ window.BuyersChecklist = {
     {
       id: "check-10",
       title: "10. Import Mark Style & Placement",
-      desc: "Identify import stamping: Discreet under-barrel (RGuns/ATI) vs Molot Russian proof vs large receiver laser billboard (Late CAI).",
+      desc: "Identify import stamping: Discreet under-barrel (ATI/Group West), RGuns' mark on top of the receiver under the scope lens, Molot Russian proof, or a large receiver laser billboard (Late CAI).",
       weight: 2
     }
   ],
 
-  checkedState: {},
+  checkedState: {},  // itemId -> boolean, which boxes are currently ticked
 
   init() {
     this.renderChecklist();
     this.bindEvents();
   },
 
+  // Renders the score badge and all 10 checklist cards from current
+  // checkedState. Called on init and after every checkbox toggle / reset.
   renderChecklist() {
     const container = document.getElementById('buyers-checklist-container');
     if (!container) return;

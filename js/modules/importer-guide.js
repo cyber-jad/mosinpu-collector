@@ -11,6 +11,8 @@ window.ImporterGuide = {
     this.bindEvents();
   },
 
+  // This module is static content (no filters/search/state) — renders once
+  // from MOSIN_DATA.importers and never re-renders itself.
   renderGuide() {
     const container = document.getElementById('importer-guide-container');
     if (!container) return;
@@ -95,7 +97,7 @@ window.ImporterGuide = {
             <div class="aesthetic-box discreet">
               <span class="aest-badge">+ $200 – $400 Value</span>
               <h4>Discreet Under-Barrel Stamping</h4>
-              <p>Found on <strong>RGuns, early ATI, and early CAI</strong> imports. Tiny two-line dot matrix or stamped text located on the underside of the barrel near the muzzle or under the cleaning rod. Leaves the receiver and barrel shank completely clean and historically authentic.</p>
+              <p>Found on <strong>early ATI, Group West, and early CAI</strong> imports. Tiny two-line dot matrix or stamped text located on the underside of the barrel near the muzzle or under the cleaning rod. Leaves the receiver and barrel shank completely clean and historically authentic. RGuns is the notable exception: its mark sits on <strong>top of the receiver, just under the front scope lens</strong> — never on the barrel underside or the scope mount itself.</p>
             </div>
 
             <div class="aesthetic-box molot-proof">
@@ -108,6 +110,30 @@ window.ImporterGuide = {
               <span class="aest-badge">- $150 – $250 Value</span>
               <h4>Giant Receiver Billboard Laser</h4>
               <p>Found on <strong>later Century Arms (CAI) and PW Arms</strong> imports. Large 1-to-2 inch laser billboard text stamped directly across the left or right side of the receiver flat. Authentic rifle underneath, but aesthetically intrusive.</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Import Mark Red Flags & Rarity Notes -->
+        <div class="import-marks-aesthetics-card">
+          <h3>Import Mark Red Flags & The Never-Refurbished Rarity Tier</h3>
+          <div class="aesthetics-grid">
+            <div class="aesthetic-box billboard">
+              <span class="aest-badge">⚠️ Fake Indicator</span>
+              <h4>Import Mark "Under" the Scope Base</h4>
+              <p>A genuine import mark is applied by the importer to an already-assembled rifle, so it never needs to sit underneath the scope mount itself. A mark positioned under the base — meaning the mount had to be removed to stamp it — is a strong sign of a faked or misapplied import mark added after the fact.</p>
+            </div>
+
+            <div class="aesthetic-box billboard">
+              <span class="aest-badge">⚠️ Fake Indicator</span>
+              <h4>RGuns Mark on a Non-Sniper Rifle</h4>
+              <p>RGuns imported sniper crates specifically — its mark showing up on a standard infantry M91/30 (no side mount, no sniper barrel proofs) means the mark was added to a rifle it was never on, almost always to inflate a plain infantry rifle's price to sniper levels.</p>
+            </div>
+
+            <div class="aesthetic-box discreet">
+              <span class="aest-badge">Top Rarity Tier</span>
+              <h4>Never-Refurbished Wartime Imports</h4>
+              <p>The scarcest and most valuable category of all: rifles that reached the US still in their original WWII-era configuration, never touched by a Cold War arsenal rebuild. Most RGuns-imported snipers, by contrast, show a 1960s–1970s Soviet refurbishment (some later reissued to Soviet police units) — still fully authentic, just not untouched wartime originals.</p>
             </div>
           </div>
         </div>
@@ -150,6 +176,9 @@ window.ImporterGuide = {
     container.innerHTML = html;
   },
 
+  // No-op: this guide has no interactive controls. Kept as a stub (rather
+  // than omitted) so it matches every other module's init() -> render +
+  // bindEvents shape, which app.js relies on when it loops over modules.
   bindEvents() {
     // Interactive handlers if needed
   }

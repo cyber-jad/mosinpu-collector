@@ -25,6 +25,8 @@ window.ValuationCalculator = {
     this.updateValuation();
   },
 
+  // Builds the static form markup (all <select> options) once. The results
+  // panel itself is left empty here and filled in by updateValuation().
   renderCalculator() {
     const container = document.getElementById('valuation-calc-container');
     if (!container) return;
@@ -76,7 +78,7 @@ window.ValuationCalculator = {
               <label for="calc-scope-condition">Scope Optical Clarity & Turret Health:</label>
               <select id="calc-scope-condition" class="form-select">
                 <option value="good_battlefield" selected>Good Battlefield Clear (Minor dust/patina, crisp reticle, smooth dials)</option>
-                <option value="mint_optics">Crystal Clear Lenses, Sharp Reticle, Crisp Clicks & Intact Leather Caps (+ $150)</option>
+                <option value="mint_optics">Crystal Clear Lenses, Sharp Reticle, Smooth Turret Turn & Intact Leather Caps (+ $150)</option>
                 <option value="foggy_cloudy">Cloudy / Fungus / Delaminated Lenses / Loose Post (- $250 Repair Cost)</option>
               </select>
             </div>
@@ -120,11 +122,13 @@ window.ValuationCalculator = {
             <div class="form-group">
               <label for="calc-importer">Importer & Import Mark Placement:</label>
               <select id="calc-importer" class="form-select">
-                <option value="rguns" selected>RGuns (Discreet tiny under-barrel mark, unissued matching crates)</option>
+                <option value="rguns" selected>RGuns (Small mark on receiver top under scope lens, unissued matching crates)</option>
                 <option value="pre68">Pre-1968 / Vet Bringback (ZERO Import Marks)</option>
                 <option value="ati">ATI (American Tactical - Discreet under-barrel mark)</option>
                 <option value="samco">Samco Global Arms (Clean barrel mark)</option>
+                <option value="groupwest">Group West (Tiny under-barrel mark + receiver flat serial under closed bolt)</option>
                 <option value="molot">Molot / KO-91/30M (Vyatskie Polyany Russian Export proofs & certificate)</option>
+                <option value="tulsky">Tulsky / PW Arms (Heavy explicit marking: barrel, receiver front & rear sight base)</option>
                 <option value="mitchells_real">Mitchell's Mausers (Verified Real Russian Molot Refurb Import)</option>
                 <option value="century_clean">Century Arms (CAI) - Early Small Under-Barrel Mark (Authentic Refurb)</option>
                 <option value="century_billboard">Century Arms (CAI) - Large Laser Billboard on Receiver Wall</option>
@@ -156,6 +160,9 @@ window.ValuationCalculator = {
     this.updateYearOptions();
   },
 
+  // Rebuilds the Year <select> to match whichever factory is now chosen
+  // (Izhevsk and Tula shipped different year ranges), keeping the previously
+  // selected year if it still exists for the new factory.
   updateYearOptions() {
     const factorySelect = document.getElementById('calc-factory');
     const yearSelect = document.getElementById('calc-year');
@@ -172,6 +179,10 @@ window.ValuationCalculator = {
     this.state.year = yearSelect.value;
   },
 
+  // Delegated change handler for every form field: syncs `state` from the
+  // current DOM values, then recalculates. Reading all fields on every
+  // change (rather than just the one that fired) keeps this simple and
+  // avoids state drift if a future field is added and forgotten here.
   bindEvents() {
     const container = document.getElementById('valuation-calc-container');
     if (!container) return;
@@ -196,6 +207,14 @@ window.ValuationCalculator = {
     });
   },
 
+  // Core pricing model. Establishes a [baseLow, baseHigh] price band from
+  // factory + year (step 1), then walks every other spec in turn (steps 2-7),
+  // each either shifting the band by a flat dollar amount or scaling it by a
+  // percentage — additive dollar shifts for scope/optics/importer swaps,
+  // multiplicative percentages for condition/quality grades. `priceDrivers`
+  // and `highlights` accumulate human-readable strings describing each
+  // adjustment so the results panel can show its work. Re-run in full on
+  // every form change (see bindEvents) rather than incrementally patched.
   updateValuation() {
     const resultsContainer = document.getElementById('calc-results-display');
     if (!resultsContainer) return;
@@ -303,7 +322,7 @@ window.ValuationCalculator = {
     } else if (scopeOpticsCondition === 'foggy_cloudy') {
       baseLow -= 250;
       baseHigh -= 300;
-      priceDrivers.push("-$250 Cloudy / Delaminated Lens or Damaged Turret Clicks");
+      priceDrivers.push("-$250 Cloudy / Delaminated Lens or Gritty/Binding Turret Movement");
     }
 
     // 3. Configuration
@@ -365,7 +384,12 @@ window.ValuationCalculator = {
     } else if (importer === 'rguns') {
       baseLow += 100;
       baseHigh += 200;
-      priceDrivers.push("+$150 RGuns Import (Discreet Under-Barrel Mark, Clean Crates)");
+      priceDrivers.push("+$150 RGuns Import (Mark on Receiver Top Under Scope Lens, Clean Crates)");
+    } else if (importer === 'groupwest') {
+      baseLow += 75;
+      baseHigh += 150;
+      priceDrivers.push("+$100 Group West Import (Tiny Under-Barrel Mark, Receiver Flat Serial Only)");
+      highlights.push("🔎 <strong>Minimal Group West Marking:</strong> Import serial is only found on the receiver flat under a closed bolt — easy to overlook, no barrel billboard or stamp block.");
     } else if (importer === 'century_billboard') {
       baseLow -= 150;
       baseHigh -= 200;
@@ -389,13 +413,21 @@ window.ValuationCalculator = {
       priceDrivers.push("-25% Battlefield Worn / Pitted Bore");
     }
 
-    // Cap maximum at $8,000 for top holy grail rifles
+    // Cap maximum at $8,000 for top holy grail rifles — the site's own
+    // calibration ceiling (see file header). Once a rifle's low estimate
+    // pushes past $7,500 it's pulled back to $7,200 so the band doesn't
+    // collapse to a single number right at the $8,000 ceiling.
     if (baseHigh > 8000) baseHigh = 8000;
     if (baseLow > 7500) baseLow = 7200;
 
-    // Final rounding
+    // Round to the nearest $25 — real listings don't quote odd dollar
+    // amounts, and it also hides the false precision of stacking ~10
+    // independent percentage/flat modifiers together.
     let finalLow = Math.round(baseLow / 25) * 25;
     let finalHigh = Math.round(baseHigh / 25) * 25;
+    // Negative modifiers (mismatched parts, faux clone, etc.) can compress
+    // the band until low/high invert or collide; enforce a minimum $300
+    // spread so the result still reads as a range rather than a point estimate.
     if (finalHigh < finalLow) finalHigh = finalLow + 300;
     if (finalHigh > 8000) finalHigh = 8000;
 

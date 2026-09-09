@@ -8,6 +8,7 @@
 
 window.MOSIN_DATA = {
   // Factory Production Statistics (Izhevsk and Tula only)
+  // rarityScore: 0-100 scarcity/desirability rating used to sort and color-code year entries in the Production Matrix (higher = rarer).
   production: {
     tula: {
       factoryName: "Tula Factory #535 / #66",
@@ -147,6 +148,9 @@ window.MOSIN_DATA = {
   ],
 
   // Authenticity Diagnostic Factors for Authenticity Wizard
+  // Each option's `points` value is added to a running total by authenticity-wizard.js;
+  // the final sum is compared against thresholds there to render a verdict
+  // (genuine / arsenal refurb / ex-sniper / likely fake). Negative points flag red-flag answers.
   authFactors: [
     {
       id: "barrel_proofs",
@@ -311,22 +315,22 @@ window.MOSIN_DATA = {
       name: "RGuns (Carpentersville, IL)",
       importEra: "2000s–2010s",
       reputation: "Gold Standard for Unissued / Matching",
-      importMarkStyle: "Tiny discreet dot-matrix under barrel near muzzle",
+      importMarkStyle: "Small mark on top of the receiver, just under the front scope lens — never on the barrel side or under the scope mount",
       authenticityRate: "99% Real Authentic Sniper Crates",
       priceImpact: "+ $200 – $400 Premium",
-      description: "Imported unissued sniper crates directly from Ukrainian military storage. High percentage of all-stamped factory matching rifles with original scopes.",
-      keyNotes: "Highly sought after by serious collectors for un-molested factory originality."
+      description: "Imported unissued sniper crates directly from Ukrainian military storage. High percentage of all-stamped factory matching rifles with original scopes. Rifles show electro-penciled matching serial and scope numbers on the mount, consistent with a 1960s–1970s Soviet arsenal refurbishment before export.",
+      keyNotes: "Highly sought after by serious collectors for un-molested factory originality. RED FLAG: if the 'RGuns' mark appears anywhere else — on the barrel side, under the scope mount, or on a standard non-sniper M91/30 — treat it as a strong indicator of a faked import mark."
     },
     {
       id: "molot",
       name: "Molot / Vyatskie Polyany (KO-91/30M)",
       importEra: "2010s",
       reputation: "Authentic Russian Arsenal Factory Export",
-      importMarkStyle: "Laser marked with Russian CIP export proofs & certificate",
+      importMarkStyle: "'Bn' trademark on the receiver and under the handguard, plus a diamond Russian government proof mark. IO Inc. (the US importer/distributor) added the BATF-required serial behind the barrel shank and its own import mark on the barrel near the muzzle; some later batches carry the Molot import mark on top of the receiver instead.",
       authenticityRate: "98% Genuine Russian Arsenal Refurbs",
       priceImpact: "High Solid Value ($1,800 – $2,200)",
-      description: "Direct exports from Russian Ministry of Defense strategic reserve depots.",
-      keyNotes: "Comes with official Russian arsenal proof passports and matching serial documentation."
+      description: "Direct exports from Russian Ministry of Defense strategic reserve depots, distributed in the US by IO Inc. through sellers like AIM Surplus, Century, and Centerfire.",
+      keyNotes: "Comes with official Russian arsenal proof passports and matching serial documentation. CAUTION: scope numbers on Molots are frequently relined or restamped in visibly modern fonts — don't assume a Molot's scope-to-mount serial match is untouched wartime work. Tula-marked Molot examples are unusual in showing the scope number stamped on the barrel itself."
     },
     {
       id: "ati",
@@ -343,12 +347,23 @@ window.MOSIN_DATA = {
       id: "samco",
       name: "Samco Global Arms (Miami, FL)",
       importEra: "1990s–2000s",
-      reputation: "Early Surplus Imports",
-      importMarkStyle: "Clean barrel stamping near muzzle",
+      reputation: "Early Surplus Imports (Yugoslav Reserve Stock)",
+      importMarkStyle: "Clean barrel stamping near muzzle; the rifle's own serial number is stamped under the buttplate rather than laser-marked on the receiver",
       authenticityRate: "90% Genuine Early Imports",
       priceImpact: "Strong Provenance ($1,800 – $2,300)",
-      description: "Famous early surplus batches including authentic Yugoslavian and Soviet sniper reserves.",
-      keyNotes: "Early pre-ban imports from European storage reserves."
+      description: "Famous early surplus batches sourced from Yugoslavian military reserves — imported as bare sniper rifles WITHOUT scopes, so the Kochetov mount holes are present, drilled, and tapped (sometimes still with the mounting pins in place) but no optic is included.",
+      keyNotes: "Two easy visual tells for a genuine Samco Yugoslav import: the cleaning rod head is brazed on and shows brass/gold coloring at the joint, and the packing grease is noticeably darker than typical Russian-depot grease. Since these came without scopes, a period-correct scope must be sourced and fitted separately — factor that into value versus a rifle that arrived with matching original optics."
+    },
+    {
+      id: "groupwest",
+      name: "Group West",
+      importEra: "1990s",
+      reputation: "Minimal-Mark Early Surplus Import",
+      importMarkStyle: "Tiny discreet mark under the barrel near the muzzle end; import serial stamped on the receiver flat, visible only with the bolt closed",
+      authenticityRate: "High — Genuine Soviet Surplus",
+      priceImpact: "Solid Provenance (comparable to other discreet-mark imports, ~$1,800 – $2,200)",
+      description: "Part of the 1990s wave of importers bringing in Soviet surplus rifles, distinguished by unusually minimal, easy-to-overlook import marking compared to later importers' barrel billboards.",
+      keyNotes: "Check the receiver flat under the closed bolt for the import serial — it's easy to miss since there's no under-barrel stamp block or billboard like later imports used."
     },
     {
       id: "mitchells",
@@ -366,11 +381,22 @@ window.MOSIN_DATA = {
       name: "Century Arms International (CAI)",
       importEra: "1990s–2010s",
       reputation: "Two Distinct Categories: Real Refurbs vs Commercial Builds",
-      importMarkStyle: "Early: discreet under-barrel. Late: Large laser billboard on receiver wall.",
+      importMarkStyle: "Early: discreet under-barrel. Late: Large laser billboard on receiver wall. Genuine Ukrainian-sourced Century sniper imports often carry serial numbers beginning with the prefix '9130S'.",
       authenticityRate: "50% Real Refurbs / 50% US Faux Builds",
       priceImpact: "Variable ($750 Clone vs $1,800+ Real Refurb)",
       description: "Century imported 100% genuine Soviet arsenal refurbished snipers, BUT also assembled commercial 'faux' snipers in the US using standard 91/30 infantry rifles and reproduction scopes.",
-      keyNotes: "Mandatory to check barrel shank for 'C-in-circle' or 'СН' proofs and forged mount screws."
+      keyNotes: "Mandatory to check barrel shank for 'C-in-circle' or 'СН' proofs and forged mount screws. On genuine examples the scope number is stamped on the barrel side; some rifles show this number deliberately scrubbed out."
+    },
+    {
+      id: "tulsky",
+      name: "Tulsky Patronny Zavod (via PW Arms)",
+      importEra: "April 2014+",
+      reputation: "Modern Russian Export, Clearly Marked",
+      importMarkStyle: "PW Arms import marks on the barrel front and receiver front, 'Made in Russia' stamped on the right side of the receiver, a 'T inside a circle inside a triangle' Tulsky trademark, and the diamond Russian government proof mark. Additional markings appear on the rear sight base.",
+      authenticityRate: "High — Genuine Russian Arsenal Stock",
+      priceImpact: "Market Value ($1,700 – $2,100)",
+      description: "One of the last major legal waves of Russian Mosin surplus into the US, imported by PW Arms starting April 2014 and sold on through dealers including SAMCO, AIM Surplus, Classic Arms, and Royal Tiger Imports.",
+      keyNotes: "The heaviest and most explicit import marking of any major importer on this list — genuinely hard to miss, which also makes an UNMARKED rifle claimed as a 'Tulsky/PW Arms import' worth a second look."
     }
   ]
 };
